@@ -22,6 +22,9 @@ def read_annotated_fasta(filePath):
         foldClassDictionary = {}
         foldClassCounter = 0
 
+        moleculeDictionary = {}
+        moleculeCounter = 0
+
         currentFoldClass = ""
         id = ""
         sequence = ""
@@ -31,38 +34,46 @@ def read_annotated_fasta(filePath):
                 continue
             elif line.startswith("TYPE"):
 
-                # if we were working on a protein, save it. 
+                # if we were working on a protein, save it.
                 if not sequence is "":
                     preProcessedData.append((currentFoldClass, id, sequence))
 
                 # pull out the fold class from the file
-                currentFoldClass = line[(line.find(")")+1):].strip()
+                currentFoldClass = line[(line.find(")") + 1):].strip()
 
-                # maintain a dictionary of fold class to integer key. 
+                # maintain a dictionary of fold class to integer key.
                 # this will be used to build our one-hot encoded vector
                 # for class type
                 if not currentFoldClass in foldClassDictionary:
                     foldClassDictionary[currentFoldClass] = foldClassCounter
                     foldClassCounter = foldClassCounter + 1
 
-                # this is new data, so reset everything. 
+                # this is new data, so reset everything.
                 id = ""
                 sequence = ""
             elif line.startswith(">"):
 
-                # if we were working on a protein, save it. 
+                # if we were working on a protein, save it.
                 if not sequence is "":
                     preProcessedData.append((currentFoldClass, id, sequence))
 
                 # pull out the id of the protein
                 id = line[1:].strip()
 
-                # this is a new line, so reset the sequence. class is the same. 
+                # this is a new line, so reset the sequence.  class is the
+                # same.
                 sequence = ""
             else:
 
-                # continue appending to the sequence data. 
-                sequence += line.strip()
+                # continue appending to the sequence data.
+                line = line.strip()
+                for c in line:
+                    if not c in moleculeDictionary:
+                        moleculeDictionary[c] = moleculeCounter
+                        moleculeCounter = moleculeCounter + 1
+                sequence += line
+
+        vocabSize = moleculeCounter
         
         for tuple in preProcessedData:
             currentFoldClass = tuple[0]
@@ -72,7 +83,11 @@ def read_annotated_fasta(filePath):
             classVector = np.zeros([foldClassCounter])
             classVector[foldClassDictionary[currentFoldClass]] = 1
 
-            sequenceVector = [ord(a) for a in sequence]
+            sequenceVector = np.zeros([700,vocabSize])
+
+            for a in range(0, len(sequence)):
+                index = moleculeDictionary[sequence[a]]
+                sequenceVector[a][index] = 1
 
             ret.append(Protein(currentFoldClass, id, sequence, sequenceVector, classVector))
     return ret
