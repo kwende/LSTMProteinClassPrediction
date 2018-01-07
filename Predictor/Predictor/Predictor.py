@@ -48,6 +48,5 @@ with tf.Session() as session:
 
         o, l = session.run([optmizer, lastLayer], feed_dict={x : batch[0], y : batch[1]})
         
-        print(np.argmax(l, 1))
-        print(np.argmax(batch[1], 1))
+        print(str(np.argmax(l, 1)) + "vs" + str(np.argmax(batch[1], 1)))
 
