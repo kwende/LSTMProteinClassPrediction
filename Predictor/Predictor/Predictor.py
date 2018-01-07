@@ -46,5 +46,8 @@ with tf.Session() as session:
         batch = batch_builder.next_batch(batch_size, 
                                          [r.SequenceVector for r in ret], [r.ClassVector for r in ret])
 
-        session.run([optmizer], feed_dict={x : batch[0], y : batch[1]})
+        o, l = session.run([optmizer, lastLayer], feed_dict={x : batch[0], y : batch[1]})
+        
+        print(np.argmax(l, 1))
+        print(np.argmax(batch[1], 1))
 
