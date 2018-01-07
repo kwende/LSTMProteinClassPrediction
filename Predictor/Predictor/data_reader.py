@@ -6,6 +6,7 @@ class Protein:
         self.ClassName = className
         self.Name = name
         self.Sequence = sequence
+        self.SequenceLength = len(sequence)
 
         self.SequenceVector = sequenceVector
         self.ClassVector = classVector

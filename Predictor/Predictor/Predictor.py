@@ -19,16 +19,17 @@ x = tf.placeholder(dtype=tf.float32, shape=[batch_size, 700, vocabSize])
 y = tf.placeholder(dtype=tf.float32, shape=[batch_size, classVectorSize])
 
 # create my lstm cells
+sequenceLength = tf.placeholder(dtype=tf.float32, shape=[batch_size])
 cell1 = tf.contrib.rnn.BasicLSTMCell(cell1Size)
 cell2 = tf.contrib.rnn.BasicLSTMCell(cell2Size)
 multiLayerCell = tf.contrib.rnn.MultiRNNCell(cells=[cell1, cell2])
 
 # this is the operation that works over the lstm cells.
-initial_state = rnn_cell.zero_state(batch_size, dtype=tf.float32)
+#initial_state = rnn_cell.zero_state(batch_size, dtype=tf.float32)
 _, state = tf.nn.dynamic_rnn(dtype=tf.float32, 
                              cell=multiLayerCell, 
                              inputs=x, 
-                             initial_state=initial_state)
+                             sequence_length=sequenceLength)
 lstmOutput = state[-1][-1]
 outputShape = lstmOutput.get_shape().as_list()
 
@@ -47,10 +48,12 @@ with tf.Session() as session:
     for i in range(0, trainingIterations):
 
         batch = batch_builder.next_batch(batch_size, 
-                                         [r.SequenceVector for r in ret], 
+                                         [(r.SequenceVector, r.SequenceLength) for r in ret], 
                                          [r.ClassVector for r in ret])
 
-        o, l, w = session.run([optmizer, lastLayer, weights], feed_dict={x : batch[0], y : batch[1]})
+        xVals = [l[0] for l in batch[0]]
+        xValLengths = [l[1] for l in batch[0]]
+        o, l, w = session.run([optmizer, lastLayer, weights], feed_dict={x : xVals, y : batch[1], sequenceLength : xValLengths})
         
         print(str(np.argmax(l, 1)) + "vs" + str(np.argmax(batch[1], 1)))
 
