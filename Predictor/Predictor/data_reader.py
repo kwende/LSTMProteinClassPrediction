@@ -81,10 +81,12 @@ def read_annotated_fasta(filePath):
             id = tuple[1]
             sequence = tuple[2]
 
+            print(str(len(sequence)))
+
             classVector = np.zeros([foldClassCounter])
             classVector[foldClassDictionary[currentFoldClass]] = 1
 
-            sequenceVector = np.zeros([700,vocabSize])
+            sequenceVector = np.zeros([1024,vocabSize])
 
             for a in range(0, len(sequence)):
                 index = moleculeDictionary[sequence[a]]
