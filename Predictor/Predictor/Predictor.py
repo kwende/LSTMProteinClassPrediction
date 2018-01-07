@@ -24,7 +24,11 @@ cell2 = tf.contrib.rnn.BasicLSTMCell(cell2Size)
 multiLayerCell = tf.contrib.rnn.MultiRNNCell(cells=[cell1, cell2])
 
 # this is the operation that works over the lstm cells.
-_, state = tf.nn.dynamic_rnn(dtype=tf.float32, cell=multiLayerCell, inputs=x)
+initial_state = rnn_cell.zero_state(batch_size, dtype=tf.float32)
+_, state = tf.nn.dynamic_rnn(dtype=tf.float32, 
+                             cell=multiLayerCell, 
+                             inputs=x, 
+                             initial_state=initial_state)
 lstmOutput = state[-1][-1]
 outputShape = lstmOutput.get_shape().as_list()
 
