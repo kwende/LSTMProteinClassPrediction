@@ -36,17 +36,17 @@ lastLayer = tf.matmul(lstmOutput, weights) + biases
 cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=lastLayer, labels=y))
 optmizer = tf.train.AdamOptimizer().minimize(cost)
 
-init = tf.global_variables_initializer()
-
 with tf.Session() as session:
-    session.run(init)
+
+    tf.global_variables_initializer().run(session=session)
 
     for i in range(0, trainingIterations):
 
         batch = batch_builder.next_batch(batch_size, 
-                                         [r.SequenceVector for r in ret], [r.ClassVector for r in ret])
+                                         [r.SequenceVector for r in ret], 
+                                         [r.ClassVector for r in ret])
 
-        o, l = session.run([optmizer, lastLayer], feed_dict={x : batch[0], y : batch[1]})
+        o, l, w = session.run([optmizer, lastLayer, weights], feed_dict={x : batch[0], y : batch[1]})
         
         print(str(np.argmax(l, 1)) + "vs" + str(np.argmax(batch[1], 1)))
 
